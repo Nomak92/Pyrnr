@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block csssection %}
+    {% load static %}
+    <script type="text/javascript" src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+    <script type="text/javascript"  src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script type="text/javascript"  src="{% static 'js/jquery.easing.js' %}"></script>
+    <script type="text/javascript"  src="{% static 'js/node_modules/codemirror/lib/codemirror.js' %}"></script>
+    <script type="text/javascript"  src="{% static 'js/node_modules/codemirror/mode/python/python.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/codemirror.css' %}">
+    <link rel="stylesheet" href="{% static 'js/node_modules/codemirror/theme/dracula.css' %}">
+    <script type="text/javascript"  src="{% static 'js/codeblock.js' %}"></script>
+{% endblock %}
+{% block bodysection %}
+    {% csrf_token %}
+    <div class="container-fluid">
+        <div class="d-sm-flex justify-content-between align-items-center mb-4">
+            <h3 class="text-dark mb-0">Script Dashboard</h3>
+            <a class="btn btn-primary btn-sm d-none d-sm-inline-block" role="button" href="{% url 'new_script' %}">
+                <strong>Create Script</strong>
+            </a>
+        </div>
+<!--Iterate scripts from user logged in-->
+        {% for script in scripts %}
+            <div class="row">
+                <div class="col">
+                    <div class="card shadow border-left-primary">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-2">
+                                    <div class="text-uppercase text-primary font-weight-bold text-xs">
+                                        <span>{{ script.name}}</span>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="text-dark font-weight-bold h6">
+                                        <span>{{ script.description }}</span>
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <button id="showbtn{{ script.id }}" type="button" class="collapsible btn btn-primary fas fa-bars fa-2x text-gray-300 float-right" data-toggle="collapse" data-target="#cmc{{ script.id }}" aria-expanded="false" aria-controls="cmc{{ script.id }}"></button>
+                                </div>
+                                <div class="col-1">
+                                    <button id="delete{{ script.id }}" type="button" class="btn btn-danger fas fa-trash float-right"></button>
+                                </div>
+                            </div>
+                            <div class="collapse row" id="cmc{{ script.id }}">
+                                <div class="col-1">
+                                    <button type="button" id="run{{ script.id }}" class="btn btn-primary">Execute</button>
+                                    <button type="button" class="btn btn-primary mt-3" id="save{{ script.id }}">Save</button>
+                                </div>
+                                <div class="col-5">
+                                    <textarea id="cm{{ script.id }}" class="code-block col-12">{{ script.content}}</textarea>
+                                </div>
+                                <div class="col-5">
+                                    <textarea id="result{{ script.id }}" class="code-block col-12">Results...</textarea>
+                                </div>
+                                <script>
+                                    var csrf_token = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                                    var cmeditor{{ script.id }};
+                                    var showbutton{{ script.id }} = document.getElementById("showbtn{{ script.id }}");
+                                    var runbutton{{ script.id }} = document.getElementById("run{{ script.id }}");
+                                    var savebutton{{ script.id }} = document.getElementById("save{{ script.id }}");
+                                    var deletebutton{{ script.id }} = document.getElementById("delete{{ script.id }}");
+                                    var results{{ script.id }};
+                                    var resulteditor{{ script.id }};
+                                    showbutton{{ script.id }}.addEventListener("click", function(){
+                                        cmeditor{{ script.id }} = createCodeBlock(document.getElementById('cm{{ script.id }}'),
+                                            document.getElementById('cmc{{ script.id }}'));
+                                        resulteditor{{ script.id }} = createCodeBlock(document.getElementById('result{{ script.id }}'),
+                                            document.getElementById('cmc{{ script.id }}'));
+                                    });
+                                    runbutton{{ script.id }}.addEventListener("click", function(){
+                                        setCodeBlock(resulteditor{{ script.id }}, 'Waiting...')
+                                        let results{{ script.id }} = runCode(data=getcodeData(cmeditor{{ script.id }}),csrftoken=csrf_token,url='/runner');
+                                        setCodeBlock(resulteditor{{ script.id }}, results{{ script.id }});
+                                    });
+                                    savebutton{{ script.id }}.addEventListener("click", function(){
+                                        setCodeBlock(resulteditor{{ script.id }}, 'Saving...');
+                                        let results{{ script.id }} = saveCode(data=getcodeData(cmeditor{{ script.id }},{{ script.id }},"{{script.name}}"),csrftoken=csrf_token,url='/saver');
+                                        setCodeBlock(resulteditor{{ script.id }}, results{{ script.id }})
+                                    });
+                                    deletebutton{{ script.id }}.addEventListener("click", async function(){
+                                        let isDelete = confirm("Are you sure you want to delete script?");
+                                        if(isDelete){
+                                            let delete_response = await deleteCode({{ script.id }}, csrftoken=csrf_token, url='/deleter');
+                                            window.location.replace(delete_response.url);
+                                        }
+                                    })
+                                </script>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock  %}

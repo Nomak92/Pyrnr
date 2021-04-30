@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block csssection %}
+    {% load static %}
+    <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/jquery.easing.js' %}"></script>
+    <script src="{% static 'js/jquery.cookie.min.js'     %}"></script>
+    <script src="{% static 'js/node_modules/codemirror/lib/codemirror.js' %}"></script>
+    <script src="{% static 'js/node_modules/codemirror/mode/python/python.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/codemirror.css' %}">
+    <link rel="stylesheet" href="{% static 'js/node_modules/codemirror/theme/dracula.css' %}">
+    <script src="{% static 'js/codeblock.js' %}"></script>
+{% endblock %}
+{% block bodysection %}
+<div class="container-fluid">
+    <div class="d-sm-flex justify-content-between align-items-center mb-4">
+        <h3 class="text-dark mb-0">Create New Script</h3>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="card shadow border-left-primary">
+                <div class="card-body">
+                    <form id="newscript-form" method="post">
+                        {% csrf_token %}
+                        <table id="id_script_table" class="table">
+                            <tr>
+                                <td><label for="id_script_name">Name</label></td>
+                                <td><input id="id_script_name" name="name"
+                                           type="text" class="form-control"></td>
+                            </tr>
+                            <tr>
+                                <td><label for="id_script_description">Script Description</label></td>
+                                <td><input id="id_script_description" name="description"
+                                           type="text" class="form-control"></td>
+                            </tr>
+                        </table>
+                    </form>
+                    <div class="row">
+                        <div class="col">
+                            <button id="run" class="btn btn-primary float-left">Execute</button>
+                        </div>
+                        <div class="col">
+                            <button id="submit_form" class="btn btn-primary float-right">Submit</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-5">
+                            <textarea id="cm" class="code-block col-12">Enter Script Here...</textarea>
+                        </div>
+                        <div class="col-5">
+                            <textarea id="result" class="code-block col-12">Results...</textarea>
+                        </div>
+                    </div>
+                    <script>
+                        var runbutton = document.getElementById("run");
+                        var submitbutton = document.getElementById("submit_form");
+                        var cmeditor = createCodeBlock(document.getElementById('cm'), document.getElementById('cmc'));
+                        var resulteditor = createCodeBlock(document.getElementById('result'), document.getElementById('cmc'));
+                        var csrf_token = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                        runbutton.addEventListener("click", async function(){
+                            setCodeBlock(resulteditor, 'Waiting...')
+                            let results = runCode(data=getcodeData(cmeditor),csrftoken=csrf_token,url='/runner');
+                            setCodeBlock(resulteditor, results);
+                        });
+                        submitbutton.addEventListener("click", async function(){
+                            let script = cmeditor.getValue()
+                            console.log('submit pressed:' + script);
+                            if(document.getElementById("id_content")){
+                                console.log('id_content found - adding script: ' + script)
+                                document.getElementById("id_content").setAttribute("value", script);
+                            }else {
+                                console.log('creating id_content with script: ' + script)
+                                $("<textarea>").attr("name", "content").val(script).attr("style", "display: None;").attr("id", "id_content").appendTo($('#newscript-form'));
+                            }
+                            const form = new FormData(document.getElementById('newscript-form'));
+                            console.log(form);
+                            let form_response = await fetch(window.location.href,{
+                                method: 'POST',
+                                body: form
+                            });
+                            console.log(form_response);
+                            if(form_response.redirected){
+                                alert("Script Saved Successfully");
+                                window.location.replace(form_response.url);
+                            }else{
+                                alert("Error Saving Script");
+                            }
+                            }
+                        );
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

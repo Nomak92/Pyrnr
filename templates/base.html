@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/fontawesome-all.min.css' %}" />
+    {% block csssection %}
+    {% endblock %}
+    {% if title %}
+        <title>{{ title }}</title>
+    {% else %}
+        <title>LAPI</title>
+    {% endif %}
+    {% block headsection %}{% endblock %}
+</head>
+<body>
+    <div id="wrapper">
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div id="content">
+                <nav class="navbar navbar-inverse navbar-fixed-top navbar-dark navbar-expand bg-primary mb-2 topbar">
+                    <div class="container-fluid">
+                        <ul class="nav navbar-nav">
+                        <a class="navbar-brand" href="/">Lab Automated Provisioning: Infrastructure</a>
+                        {% if user.is_authenticated %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'scriptdash' %}">Script Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Logout</a></li>
+                        {% else %}
+
+                        <li class="nav-item"><a class="nav-link" href="{% url 'register' %}">Register</a></li>
+                        {% endif %}
+                        </ul>
+                        <ul class="nav navbar-nav ml-auto">
+                         {% if user.is_authenticated %}
+                            <li class="nav-item"><a class="nav-link disabled fa-2x text-black-50">{{ user.username }}</a></li>
+                        {% else %}
+                            <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
+                        {% endif %}
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </div>
+    {% if messages %}
+    <hr>
+    <ul>
+        {% for message in messages %}
+            <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+{% block bodysection %}{% endblock %}
+</body>
