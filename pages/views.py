@@ -80,6 +80,8 @@ def deleter_view(request, *args, **kwargs):
             return redirect(scriptdash_view)
     else:
         return HttpResponseBadRequest()
+
+
 @login_required
 def saver_view(request, *args, **kwargs):
     if request.method == 'PUT':
@@ -100,7 +102,7 @@ def saver_view(request, *args, **kwargs):
 def runner_view(request, *args, **kwargs):
     if request.method == 'POST':
         script = "runner_script.py"
-        shell = "./venv/py/bin/python"
+        shell = "python"
         request_data = json.loads(request.body.decode('utf-8'))
         with open(script, 'w') as f:
             f.write(request_data['script_content'])
