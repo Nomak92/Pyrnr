@@ -16,6 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from pages.views import scriptdash_view, runner_view, saver_view, home_view, register_view, newscript_view, deleter_view
+from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,5 +27,6 @@ urlpatterns = [
     path('runner', runner_view, name='runner'),
     path('saver', saver_view, name='saver'),
     path('register', register_view, name='register'),
-    path('deleter', deleter_view, name='deleter')
+    path('deleter', deleter_view, name='deleter'),
+    path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
 ]

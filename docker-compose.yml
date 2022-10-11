@@ -14,14 +14,29 @@ services:
     networks:
       net:
         ipv4_address: 172.19.0.2
+
   adminer:
     image: adminer
     restart: always
     ports:
-      - "8000:8080"
+      - "8080"
     networks:
       net:
         ipv4_address: 172.19.0.3
+
+  front:
+    image: pyrnr-frontend
+    restart: always
+    environment:
+      - "POSTGRES_HOST=db"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    networks:
+      net:
+        ipv4_address: 172.19.0.4
 
 volumes:
   database-data:

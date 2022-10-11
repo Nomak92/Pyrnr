@@ -3,7 +3,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
-"script_id": 1,
-"script_content": "print('hello all')",
+"script_id": "1",
+"script_content": "print('hello world')",
 "script_name": "test script"
 }

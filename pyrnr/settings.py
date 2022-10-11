@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
-
+    "rest_framework",
+    "rest_framework.authtoken",
     'scripts',
     'pages'
 
@@ -63,6 +64,11 @@ CORS_ORIGIN_WHITELIST = (
     'http://127.0.0.1:8000'
 )
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+}
 
 ROOT_URLCONF = 'pyrnr.urls'
 
@@ -93,7 +99,7 @@ DATABASES = {
         'NAME': 'app_data',
         'USER': 'postgres',
         'PASSWORD': os.getenv("POSTGRES_PASSWORD"),
-        "HOST": "localhost",
+        "HOST": os.getenv("POSTGRES_HOST"),
         "port": "5432"
     }
 }
