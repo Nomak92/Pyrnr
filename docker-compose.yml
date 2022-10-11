@@ -25,7 +25,7 @@ services:
         ipv4_address: 172.19.0.3
 
   front:
-    image: pyrnr-frontend
+    image: nomak92/pyrnr
     restart: always
     environment:
       - "POSTGRES_HOST=db"

@@ -1,15 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pyrnr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pyrnr
+  template:
+    metadata:
+      labels:
+        app: pyrnr
+    spec:
+      containers:
+      - name: pyrnr
+        image: nomak92/pyrnr:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: POSTGRES_HOST
+          value: "server591892104.postgres.database.azure.com"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-auth
+              key: password
+        - name: POSTGRES_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: postgres-auth
+              key: username
+        - name: DJANGO_SECRET
+          valueFrom:
+              secretKeyRef:
+                name: django-secret
+                key: secret
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - pyrnr
+                topologyKey: kubernetes.io/hostname
+---
 apiVersion: v1
 kind: Service
 metadata:
-  name: pyrnr-frontend
-  labels:
-    app: pyrnr
+  name: pyrnr-svc
 spec:
-  ports:
-    - port: 80
-      name: http
-    - port: 443
-      name: https
-  clusterIP: None
+  type: LoadBalancer
   selector:
     app: pyrnr
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8000
+---
